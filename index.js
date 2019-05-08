@@ -19,8 +19,17 @@ function displayResults(responseJson) {
   // put park data into html
   console.log(responseJson.length);
   console.log(responseJson.message);
-  console.log(responseJson.data);
+  console.log(responseJson.data.length);
 
+  // returning 1 extra???? 0 based? subtract by 1 from length to ugly fix it?
+  $('#js-park-ul').empty();
+
+  for (let i = 0; i < responseJson.data.length; i++) {
+    $('#js-park-ul').append(`<li>${i + 1}.</li>`);
+    $('#js-park-ul').append(`<li>${responseJson.data[i].fullName}</li>`);
+    $('#js-park-ul').append(`<li>${responseJson.data[i].description}</li>`);
+    $('#js-park-ul').append(`<li>${responseJson.data[i].url}</li>`);
+  }
 
 }
 
@@ -32,37 +41,37 @@ function getParkResults(states, maxResults=10) {
 
   // create params object housing API key, max limit, and states 
   const params = {
-    'api_key': 'sHyL5aAnlhU17AWR5lPK0CNrehBji8hzMpv70F7H',
-    'limit': maxResults,
     'stateCode': states,
+    'limit': maxResults,
+    'api_key': 'sHyL5aAnlhU17AWR5lPK0CNrehBji8hzMpv70F7H',
   };
 
   let parksURL = 'https://developer.nps.gov/api/v1/parks';
 
   // put params into browser readable string
   let paramString = formatQueryParams(params);
+  console.log(paramString);
   const url = parksURL + '?' + paramString; // CHECK THAT I CAN REFERENCE OBJ FOR URL
   console.log(url);
 
   // Now fetch url json data
   fetch(url)
-    .then( function(response) {
+    .then( response => {
       if (response.ok) {
-        return response.json;
+        return response.json();
       } else {
         throw new Error('server data not retrieved (failed fetch)');
       }
     })
-    .then(function(jsonResponse) {
+    .then(jsonResponse => {
       console.log(jsonResponse);
       displayResults(jsonResponse);
     })
     .catch(response => console.log(response.message));
 
-  
 }
 
-
+// HOW TO ACCOUNT FOR BAD CASE OF ENTERING >10 results??
 function watchFormInput() {
 
   // Get user input
@@ -70,8 +79,6 @@ function watchFormInput() {
     event.preventDefault();
     const searchStates = $('#js-search-states').val();
     const numResults = $('#js-max-results').val();
-    console.log(searchStates);
-    console.log(numResults);
     getParkResults(searchStates, numResults);
   });
 
